@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "assistant"
+authors = [
+    {name = "sakakibara yuuki", email = "sakakilabo0000@gmail.com"},
+]
+description = "This is my dream"
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Framework :: LangChain",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "openai",
+    "langchain",
+    "chromadb",
+    "tiktoken",
+    "sentence_transformers",
+    "google-search-results",
+    "unstructured",
+]
+
+dynamic = ["version"]

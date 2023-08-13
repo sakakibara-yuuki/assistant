@@ -1,0 +1,7 @@
+openai
+langchain
+chromadb
+tiktoken
+sentence_transformers
+google-search-results
+unstructured
