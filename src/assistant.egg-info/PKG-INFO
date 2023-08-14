@@ -1,9 +1,0 @@
-Metadata-Version: 2.1
-Name: assistant
-Version: 0.0.0
-Summary: This is my dream
-Author-email: sakakibara yuuki <sakakilabo0000@gmail.com>
-Classifier: Framework :: LangChain
-Classifier: Programming Language :: Python :: 3
-Requires-Python: >=3.11
-Description-Content-Type: text/markdown

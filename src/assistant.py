@@ -1,8 +1,16 @@
 import pathlib
 import argparse
-from langchain.document_loaders import TextLoader
-from langchain.document_loaders import UnstructuredHTMLLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import (
+    TextLoader,
+    UnstructuredHTMLLoader,
+    BSHTMLLoader,
+    WebBaseLoader,
+    PyPDFLoader,
+)
+from langchain.text_splitter import (
+    CharacterTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.llms import OpenAI
@@ -10,35 +18,50 @@ from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 
 
-class Reference:
-    def __init__(self, file_path):
-        documents = self.documents_loader(file_path)
-        texts = self.make_text(documents)
-        self._retriever = self.make_embedding(texts)
-
-    @property
-    def retriever(self):
-        return self._retriever
+input_list = [
+    "https://onelab.info/",
+    "./reference/gmsh.html",
+    "./reference/gmsh_paper_preprint.pdf",
+]
 
 
-    def documents_loader(self, file_path):
-        # loader = TextLoader(file_path)
-        loader = UnstructuredHTMLLoader('./gmsh/gmsh.html')
-        documents = loader.load()
+class BookShelf:
+    def __init__(self,
+                 input_list: list,
+                 is_new: bool = False):
 
-        return documents
+        loaders = []
+        loaders.append(WebBaseLoader(input_list[0]))
+        loaders.append(BSHTMLLoader(input_list[1]))
+        loaders.append(PyPDFLoader(input_list[2]))
 
-    def make_text(self, documents):
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=0)
-        texts = text_splitter.split_documents(documents)
-        return texts
+        docs = []
+        for loader in loaders:
+            docs.extend(loader.load())
 
-    def make_embedding(self, texts):
-        embeddings = OpenAIEmbeddings()
-        db = Chroma.from_documents(texts, embeddings)
-        retriever = db.as_retriever()
+        ### What do you use EMBEDDINTG ???? ########
+        self.embedding = OpenAIEmbeddings()
 
-        return retriever
+        if is_new:
+            self.vectordb = self.create_db(docs)
+        else:
+            self.vectordb = self.load_db()
+
+    def create_db(self, docs):
+        text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
+        documents = text_splitter.split_documents(docs)
+
+        ### What do you use VECTOR STORE ???? ########
+        vectordb = Chroma.from_documents(documents=documents,
+                                         embedding=self.embedding,
+                                         persist_directory="./db")
+        return vectordb
+
+    def load_db(self):
+        vectordb = Chroma(collection_name="langchain",
+                          embedding_function=self.embedding,
+                          persist_directory="./db")
+        return vectordb
 
 
 if __name__ == '__main__':
@@ -62,18 +85,17 @@ if __name__ == '__main__':
         reference_path = pathlib.Path('./gmsh/gmsh.html')
     else:
         reference_path = pathlib.Path(args.reference)
-    reference = Reference(reference_path)
-    retriever = reference.retriever
+
+    bookshelf = BookShelf(input_list)
+    vectordb = bookshelf.vectordb
 
     # LLM ラッパーの初期化
-    # llm = OpenAI(model_name="text-davinci-003", temperature=0, max_tokens=500)
     llm = ChatOpenAI(model_name="gpt-4",
                      temperature=0.9,
                      max_tokens=500)
 
-    qa = RetrievalQA.from_chain_type(llm=llm,
-                                     chain_type="stuff",
-                                     retriever=retriever)
+    qa = RetrievalQA.from_llm(llm=llm,
+                              retriever=vectordb.as_retriever())
 
     with open(prompt_path, 'r') as f:
         query = f.read()
