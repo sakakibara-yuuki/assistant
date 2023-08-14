@@ -1,7 +1,13 @@
+.gitignore
 pyproject.toml
+answer/initial
+answer/step
+prompt/initial
+prompt/step
 src/__init__.py
 src/__main__.py
 src/assistant.py
+src/__pycache__/assistant.cpython-311.pyc
 src/assistant.egg-info/PKG-INFO
 src/assistant.egg-info/SOURCES.txt
 src/assistant.egg-info/dependency_links.txt

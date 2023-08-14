@@ -47,4 +47,3 @@ index = VectorstoreIndexCreator(
 
 query = "gmshとはなんですか？"
 result = index.query(query)
-print(result)

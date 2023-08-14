@@ -22,6 +22,8 @@ dependencies = [
     "sentence_transformers",
     "google-search-results",
     "unstructured",
+    "beautifulsoup4",
+    "pypdf",
 ]
 
 dynamic = ["version"]
