@@ -18,29 +18,66 @@ from langchain.text_splitter import (
     RecursiveCharacterTextSplitter,
 )
 
+from langchain.llms import OpenAI
+from langchain.chains import RetrievalQA
+
+
+input_list = [
+    "https://onelab.info/",
+    "../reference/gmsh.html",
+    "../reference/gmsh_paper_preprint.pdf",
+]
+
+
 class BookShelf:
-    ### What do you use DOCUMENT LOADER ???? ########
-    loaders = []
+    def __init__(self,
+                 input_list: list,
+                 is_new: bool = False):
 
-    web_loader = WebBaseLoader("https://onelab.info/")
-    html_loader = BSHTMLLoader("../reference/gmsh.html")
-    pdf_loader = PyPDFLoader("../reference/gmsh_paper_preprint.pdf")
-    loaders.append(web_loader)
-    loaders.append(html_loader)
-    loaders.append(pdf_loader)
+        loaders = []
+        loaders.append(WebBaseLoader(input_list[0]))
+        loaders.append(BSHTMLLoader(input_list[1]))
+        loaders.append(PyPDFLoader(input_list[2]))
 
-    docs = []
-    for loader in loaders:
-        docs.extend(loader.load())
+        docs = []
+        for loader in loaders:
+            docs.extend(loader.load())
 
-    ### What do you use TEXT SPLITTER ???? ########
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-    documents = text_splitter.split_documents(docs)
+        ### What do you use EMBEDDINTG ???? ########
+        self.embedding = OpenAIEmbeddings()
 
-    ### What do you use EMBEDDINTG ???? ########
-    embedding = OpenAIEmbeddings()
+        if is_new:
+            self.vectordb = self.create_db(docs)
+        else:
+            self.vectordb = self.load_db()
 
-    ### What do you use VECTOR STORE ???? ########
-    vectordb = Chroma.from_documents(documents=documents,
-                                     embedding=embedding)
-    print(vectordb)
+    def create_db(self, docs):
+        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+        documents = text_splitter.split_documents(docs)
+
+        ### What do you use VECTOR STORE ???? ########
+        vectordb = Chroma.from_documents(documents=documents,
+                                         embedding=self.embedding,
+                                         persist_directory="./db")
+        return vectordb
+
+    def load_db(self):
+        vectordb = Chroma(collection_name="langchain",
+                          embedding_function=self.embedding,
+                          persist_directory="./db")
+        return vectordb
+
+
+def main():
+    query = "gmshは二次元のmeshジェネレーターですか？ 日本語で回答してください"
+    bookshelf = BookShelf(input_list)
+    vectordb = bookshelf.vectordb
+
+    qa = RetrievalQA.from_llm(llm=OpenAI(),
+                              retriever=vectordb.as_retriever())
+    result = qa.run(query)
+    print(result)
+
+
+if __name__ == "__main__":
+    main()
