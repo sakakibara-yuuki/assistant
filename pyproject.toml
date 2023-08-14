@@ -23,6 +23,7 @@ dependencies = [
     "google-search-results",
     "unstructured",
     "beautifulsoup4",
+    "deepl",
     "pypdf",
 ]
 
