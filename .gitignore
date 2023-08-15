@@ -3,3 +3,4 @@ db
 .python-version
 *.un~
 *.egg-info
+reference/*

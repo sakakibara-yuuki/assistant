@@ -27,8 +27,11 @@ dependencies = [
     "pypdf",
     "click",
     "black",
-    "Django",
     "pydantic",
+    "streamlit",
+    "esprima",
+    "markdown",
+    "fake_useragent"
 ]
 
 dynamic = ["version"]
