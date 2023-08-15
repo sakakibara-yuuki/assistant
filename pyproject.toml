@@ -25,6 +25,10 @@ dependencies = [
     "beautifulsoup4",
     "deepl",
     "pypdf",
+    "click",
+    "black",
+    "Django",
+    "pydantic",
 ]
 
 dynamic = ["version"]
