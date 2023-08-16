@@ -76,19 +76,19 @@ class BookShelf:
             elif suffix == ".html":
                 # loader = BSHTMLLoader(uri)
                 loader = UnstructuredHTMLLoader(uri)
-            # elif suffix == ".md":
-            #     loader = UnstructuredMarkdownLoader(uri)
-            # elif suffix == ".pdf":
-            #     loader = PyPDFLoader(uri)
-            # elif suffix == ".pptx":
-            #     loader = UnstructuredPowerPointLoader(uri)
-            # elif suffix == ".py":
-            #     loader = GenericLoader.from_filesystem(
-            #         uri,
-            #         glob="*",
-            #         suffixes=[".py"],
-            #         parser=LanguageParser(language=Language.PYTHON, parser_threshold=400),
-            #     )
+            elif suffix == ".md":
+                loader = UnstructuredMarkdownLoader(uri)
+            elif suffix == ".pdf":
+                loader = PyPDFLoader(uri)
+            elif suffix == ".pptx":
+                loader = UnstructuredPowerPointLoader(uri)
+            elif suffix == ".py":
+                loader = GenericLoader.from_filesystem(
+                    uri,
+                    glob="*",
+                    suffixes=[".py"],
+                    parser=LanguageParser(language=Language.PYTHON, parser_threshold=400),
+                )
             else:
                 continue
 
@@ -147,24 +147,19 @@ class BookShelf:
         exists=True, file_okay=False, dir_okay=True, writable=False, readable=True
     ),
 )
-@click.option(
-    "-l",
-    "--link",
-    default="./links",
-    show_default=True,
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
-    ),
-)
-def cli(prompt, answer, reference, link):
+def cli(prompt, answer, reference):
     prompt_path = pathlib.Path(prompt)
     answer_path = pathlib.Path(answer) / prompt_path.name
     reference_path = pathlib.Path(reference)
-    input_list = [str(p) for p in reference_path.glob("**/*") if (not p.is_dir()) and (p.suffix == ".py")]
-    with open(link, 'r') as f:
+    links_path = reference_path / 'links'
+
+    with open(links_path, 'r') as f:
         lines = f.readlines()
     for line in lines:
         input_list.append(line.rstrip())
+
+    input_list = [str(p) for p in reference_path.glob("**/*") if (not p.is_dir()) and (p.suffix == ".py")]
+
     main(prompt_path, answer_path, reference_path, input_list)
 
 def main(prompt_path, answer_path, reference_path, input_list):
