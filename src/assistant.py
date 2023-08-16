@@ -45,15 +45,28 @@ logger = logging.getLogger(__name__)
 
 
 class BookShelf:
-    def __init__(self, input_list:list = None):
+    def __init__(self, reference:str =None):
 
         self.embedding = OpenAIEmbeddings()
 
-        if input_list is not None:
+        if reference is not None:
+            input_list = self.load_input_list(reference)
             docs = self.create_documents(input_list)
             self.vectordb = self.create_db(docs)
         else:
             self.vectordb = self.load_db()
+
+
+    def load_input_list(self, reference):
+        reference_path = pathlib.Path(reference)
+        links_path = reference_path / 'links'
+        input_list = [str(p) for p in reference_path.glob("**/*") if (not p.is_dir()) and (p.suffix == ".py")]
+        with open(links_path, 'r') as f:
+            lines = f.readlines()
+        for line in lines:
+            input_list.append(line.rstrip())
+        return input_list
+
 
     def create_documents(self, input_list):
         loaders = []
@@ -148,23 +161,17 @@ class BookShelf:
     ),
 )
 def cli(prompt, answer, reference):
+    main(prompt, answer, reference)
+
+def main(prompt, answer, reference):
     prompt_path = pathlib.Path(prompt)
     answer_path = pathlib.Path(answer) / prompt_path.name
-    reference_path = pathlib.Path(reference)
-    links_path = reference_path / 'links'
 
-    with open(links_path, 'r') as f:
-        lines = f.readlines()
-    for line in lines:
-        input_list.append(line.rstrip())
-
-    input_list = [str(p) for p in reference_path.glob("**/*") if (not p.is_dir()) and (p.suffix == ".py")]
-
-    main(prompt_path, answer_path, reference_path, input_list)
-
-def main(prompt_path, answer_path, reference_path, input_list):
-    # bookshelf = BookShelf(input_list=input_list)
-    bookshelf = BookShelf()
+    # bookshelf = BookShelf(reference)
+    if not pathlib.Path('db').exists():
+        bookshelf = BookShelf(reference)
+    else:
+        bookshelf = BookShelf()
     vectordb = bookshelf.vectordb
 
     # LLM ラッパーの初期化

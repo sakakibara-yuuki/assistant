@@ -1,1 +1,3 @@
-gmshのpython APIでsyncronize()という関数がある？
+gmshには
+gmsh.model.occ.synchronize()
+という関数はある？

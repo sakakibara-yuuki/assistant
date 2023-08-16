@@ -1,1 +1,1 @@
- No, there is no syncronize() function in the Gmsh Python API.
+ Yes, gmsh does have a function called gmsh.model.occ.synchronize().
