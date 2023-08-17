@@ -62,7 +62,7 @@ class BookShelf:
     def load_input_list(self, reference):
         """ input from reference"""
         reference_path = pathlib.Path(reference)
-        input_list = [str(p) for p in reference_path.glob("**/*") if (not p.is_dir()) and (p.suffix == ".py")]
+        input_list = [str(p) for p in reference_path.glob("**/*") if not p.is_dir()]
 
         """ input from links"""
         links_path = reference_path / 'links'
