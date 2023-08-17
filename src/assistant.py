@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 class BookShelf:
     def __init__(self, reference:str =None):
 
-        self.embedding = OpenAIEmbeddings()
+        self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
 
         if reference is not None:
             input_list = self.load_input_list(reference)
@@ -184,10 +184,9 @@ def main(prompt, answer, reference):
         bookshelf = BookShelf()
     vectordb = bookshelf.vectordb
 
-    # LLM ラッパーの初期化
-    # llm = ChatOpenAI(model_name="gpt-4", temperature=1.0, max_tokens=500)
+    llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
     # chat modelだとうまくいかない
-    llm = OpenAI()
+    # llm = OpenAI(model_name="gpt-3.5-turbo-16k")
 
     qa = RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever())
 
