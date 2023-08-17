@@ -5,3 +5,4 @@ db
 *.egg-info
 reference/*
 prompt/*
+answer/*
