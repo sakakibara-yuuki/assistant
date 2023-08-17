@@ -32,7 +32,8 @@ dependencies = [
     "streamlit",
     "esprima",
     "markdown",
-    "fake_useragent"
+    "fake_useragent",
+    "rich",
 ]
 
 dynamic = ["version"]

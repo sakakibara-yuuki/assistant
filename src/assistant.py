@@ -33,6 +33,7 @@ import click
 import logging
 import esprima
 import pprint
+from rich import print
 
 # -[x]: input list
 # -[x]: click
@@ -148,24 +149,6 @@ class BookShelf:
 
 @click.command()
 @click.option(
-    "-p",
-    "--prompt",
-    default="./prompt/initial",
-    show_default=True,
-    type=click.Path(
-        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
-    ),
-)
-@click.option(
-    "-a",
-    "--answer",
-    default="./answer",
-    show_default=True,
-    type=click.Path(
-        exists=True, file_okay=False, dir_okay=True, writable=True, readable=False
-    ),
-)
-@click.option(
     "-r",
     "--reference",
     default="./reference",
@@ -174,12 +157,10 @@ class BookShelf:
         exists=True, file_okay=False, dir_okay=True, writable=False, readable=True
     ),
 )
-def cli(prompt, answer, reference):
-    main(prompt, answer, reference)
+def cli(reference):
+    main(reference)
 
-def main(prompt, answer, reference):
-    prompt_path = pathlib.Path(prompt)
-    answer_path = pathlib.Path(answer) / prompt_path.name
+def main(reference):
 
     bookshelf = BookShelf(reference)
     vectordb = bookshelf.vectordb
