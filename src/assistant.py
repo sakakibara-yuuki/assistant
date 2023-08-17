@@ -47,16 +47,18 @@ logger = logging.getLogger(__name__)
 
 
 class BookShelf:
-    def __init__(self, reference:str =None):
+    def __init__(self, reference:str=None):
 
         self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
 
-        if reference is not None:
+        if pathlib.Path('db').exists():
+            self.vectordb = self.load_db()
+        else:
+            if reference is None:
+                raise FileNotFoundError("db is not found and reference is None")
             input_list = self.load_input_list(reference)
             docs = self.create_documents(input_list)
             self.vectordb = self.create_db(docs)
-        else:
-            self.vectordb = self.load_db()
 
 
     def load_input_list(self, reference):
@@ -177,11 +179,7 @@ def main(prompt, answer, reference):
     prompt_path = pathlib.Path(prompt)
     answer_path = pathlib.Path(answer) / prompt_path.name
 
-    # bookshelf = BookShelf(reference)
-    if not pathlib.Path('db').exists():
-        bookshelf = BookShelf(reference)
-    else:
-        bookshelf = BookShelf()
+    bookshelf = BookShelf(reference)
     vectordb = bookshelf.vectordb
 
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
