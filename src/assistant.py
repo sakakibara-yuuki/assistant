@@ -25,6 +25,8 @@ from langchain.vectorstores import Chroma
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
 from pydantic import BaseModel
 from bs4 import BeautifulSoup
 import click
@@ -183,18 +185,17 @@ def main(prompt, answer, reference):
     vectordb = bookshelf.vectordb
 
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
-    # chat modelだとうまくいかない
-    # llm = OpenAI(model_name="gpt-3.5-turbo-16k")
 
-    qa = RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever())
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    qa = ConversationalRetrievalChain.from_llm(OpenAI(temperature=0), vectordb.as_retriever(), memory=memory)
 
-    with open(prompt_path, "r") as f:
-        query = f.read()
-    answer = qa.run(query)
-
-    with open(answer_path, "w") as f:
-        f.write(answer)
-    print(answer)
+    while True:
+        query = input("you:")
+        if query == "see you.":
+            print("bye.")
+            break
+        result = qa({"question": query})
+        print(result["answer"])
 
 
 if __name__ == "__main__":
