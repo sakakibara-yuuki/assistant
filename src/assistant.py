@@ -34,6 +34,7 @@ import logging
 import esprima
 import pprint
 from rich import print
+from rich.prompt import Prompt
 
 # -[x]: input list
 # -[x]: click
@@ -171,11 +172,12 @@ def main(reference):
     qa = ConversationalRetrievalChain.from_llm(OpenAI(temperature=0), vectordb.as_retriever(), memory=memory)
 
     while True:
-        query = input("you:")
+        query = Prompt.ask("[cyan]you [/cyan]")
         if query == "see you.":
-            print("bye.")
+            print("[red]A   :[/red][italic red]bye.[/italic red]")
             break
         result = qa({"question": query})
+        print("[red]A   :[/red]", end="")
         print(result["answer"])
 
 
