@@ -4,3 +4,4 @@ db
 *.un~
 *.egg-info
 reference/*
+prompt/*

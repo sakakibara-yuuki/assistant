@@ -9,6 +9,8 @@ from langchain.document_loaders import (
     PyPDFLoader,
     UnstructuredPowerPointLoader,
     UnstructuredMarkdownLoader,
+    UnstructuredEmailLoader,
+    OutlookMessageLoader,
 )
 from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.document_loaders.generic import GenericLoader
@@ -58,13 +60,17 @@ class BookShelf:
 
 
     def load_input_list(self, reference):
+        """ input from reference"""
         reference_path = pathlib.Path(reference)
-        links_path = reference_path / 'links'
         input_list = [str(p) for p in reference_path.glob("**/*") if (not p.is_dir()) and (p.suffix == ".py")]
-        with open(links_path, 'r') as f:
-            lines = f.readlines()
-        for line in lines:
-            input_list.append(line.rstrip())
+
+        """ input from links"""
+        links_path = reference_path / 'links'
+        if links_path.exists():
+            with open(links_path, 'r') as f:
+                lines = f.readlines()
+            for line in lines:
+                input_list.append(line.rstrip())
         return input_list
 
 
@@ -102,6 +108,10 @@ class BookShelf:
                     suffixes=[".py"],
                     parser=LanguageParser(language=Language.PYTHON, parser_threshold=400),
                 )
+            elif suffix == ".eml":
+                loader = UnstructuredEmailLoader(uri)
+            elif suffix == ".msg":
+                loader = OutlookMessageLoader(uri)
             else:
                 continue
 

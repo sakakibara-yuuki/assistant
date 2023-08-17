@@ -22,6 +22,7 @@ dependencies = [
     "sentence_transformers",
     "google-search-results",
     "unstructured",
+    "extract_msg",
     "beautifulsoup4",
     "deepl",
     "pypdf",
