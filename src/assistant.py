@@ -134,7 +134,6 @@ class BookShelf:
             if suffix == ".txt":
                 loader = TextLoader(uri)
             elif suffix == ".html":
-                # loader = BSHTMLLoader(uri)
                 loader = UnstructuredHTMLLoader(uri)
             elif suffix == ".md":
                 loader = UnstructuredMarkdownLoader(uri)
@@ -220,8 +219,13 @@ def chat_mode(vectordb):
         print("[red]A   :[/red]", end="")
         print(result["answer"])
 
-def qa_mode():
-    pass
+def qa_mode(vectordb):
+    with open('prompt', 'r') as f:
+        query = f.read()
+    llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
+    qa = RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever())
+    answer = qa.run(query)
+    print(answer)
 
 def summary_mode():
     pass
@@ -233,23 +237,8 @@ def main(reference, mode):
 
     if mode == "chat":
         chat_mode(vectordb)
-
-    # llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
-
-    # memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    # # memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
-    # qa = ConversationalRetrievalChain.from_llm(
-    #     llm, vectordb.as_retriever(), memory=memory, max_tokens_limit=8000
-    # )
-
-    # while True:
-    #     query = Prompt.ask("[cyan]you [/cyan]")
-    #     if re.match('(Bye|bye|BYE).*', query) is not None:
-    #         print("[red]A   :[/red][italic red]bye![/italic red]")
-    #         break
-    #     result = qa({"question": query})
-    #     print("[red]A   :[/red]", end="")
-    #     print(result["answer"])
+    elif mode == "qa":
+        qa_mode(vectordb)
 
 
 if __name__ == "__main__":
