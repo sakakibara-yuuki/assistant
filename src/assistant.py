@@ -51,34 +51,65 @@ logger = logging.getLogger(__name__)
 
 
 class BookShelf:
-    def __init__(self, reference:str=None):
-
+    def __init__(self, reference:str):
         self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
 
-        if pathlib.Path('db').exists():
+        if pathlib.Path("db").exists():
             self.vectordb = self.load_db()
         else:
             if reference is None:
                 raise FileNotFoundError("db is not found and reference is None")
-            input_list = self.load_input_list(reference)
+            # input_list = self.load_input_list(reference)
+            input_list = self.load_reference(reference)
             docs = self.create_documents(input_list)
             self.vectordb = self.create_db(docs)
 
+    def load_reference(self, reference):
+        reference_path = pathlib.Path(reference)
+
+        if not reference_path.exists():
+            raise FileNotFoundError("reference is not Found")
+
+        if reference_path.is_dir():
+            raise FileNotFoundError("reference must be file not dir")
+
+        with open(reference_path, "r") as f:
+            input_list = []
+            lines = f.readlines()
+            for line in lines:
+
+                """ when line is url """
+                uri = line.rstrip()
+                o = urlparse(uri)
+                if o.scheme in ("http", "https"):
+                    input_list.append(uri)
+                    continue
+
+                """ when line is directory path """
+                p = pathlib.Path(uri)
+                if p.is_dir():
+                    for _p in p.glob("**/*"):
+                        if _p.is_dir():
+                            continue
+                        input_list.append(str(_p))
+                else:
+                    input_list.append(str(p))
+
+        return input_list
 
     def load_input_list(self, reference):
-        """ input from reference"""
+        """input from reference"""
         reference_path = pathlib.Path(reference)
         input_list = [str(p) for p in reference_path.glob("**/*") if not p.is_dir()]
 
         """ input from links"""
-        links_path = reference_path / 'links'
+        links_path = reference_path / "links"
         if links_path.exists():
-            with open(links_path, 'r') as f:
+            with open(links_path, "r") as f:
                 lines = f.readlines()
             for line in lines:
                 input_list.append(line.rstrip())
         return input_list
-
 
     def create_documents(self, input_list):
         loaders = []
@@ -112,7 +143,9 @@ class BookShelf:
                     uri,
                     glob="*",
                     suffixes=[".py"],
-                    parser=LanguageParser(language=Language.PYTHON, parser_threshold=400),
+                    parser=LanguageParser(
+                        language=Language.PYTHON, parser_threshold=400
+                    ),
                 )
             elif suffix == ".eml":
                 loader = UnstructuredEmailLoader(uri)
@@ -152,24 +185,26 @@ class BookShelf:
 @click.option(
     "-r",
     "--reference",
-    default="./reference",
+    default=None,
     show_default=True,
     type=click.Path(
-        exists=True, file_okay=False, dir_okay=True, writable=False, readable=True
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
     ),
 )
 def cli(reference):
     main(reference)
 
-def main(reference):
 
+def main(reference):
     bookshelf = BookShelf(reference)
     vectordb = bookshelf.vectordb
 
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    qa = ConversationalRetrievalChain.from_llm(OpenAI(temperature=0), vectordb.as_retriever(), memory=memory)
+    qa = ConversationalRetrievalChain.from_llm(
+        OpenAI(temperature=0), vectordb.as_retriever(), memory=memory
+    )
 
     while True:
         query = Prompt.ask("[cyan]you [/cyan]")
