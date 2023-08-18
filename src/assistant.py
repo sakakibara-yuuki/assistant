@@ -196,14 +196,13 @@ class BookShelf:
         exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
     ),
 )
-def cli(reference):
-    main(reference)
+@click.option('--mode',
+              default='chat',
+              type=click.Choice(['qa', 'chat'], case_sensitive=False))
+def cli(reference, mode):
+    main(reference, mode)
 
-
-def main(reference):
-    bookshelf = BookShelf(reference)
-    vectordb = bookshelf.vectordb
-
+def chat_mode(vectordb):
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -220,6 +219,37 @@ def main(reference):
         result = qa({"question": query})
         print("[red]A   :[/red]", end="")
         print(result["answer"])
+
+def qa_mode():
+    pass
+
+def summary_mode():
+    pass
+
+def main(reference, mode):
+
+    bookshelf = BookShelf(reference)
+    vectordb = bookshelf.vectordb
+
+    if mode == "chat":
+        chat_mode(vectordb)
+
+    # llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
+
+    # memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    # # memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+    # qa = ConversationalRetrievalChain.from_llm(
+    #     llm, vectordb.as_retriever(), memory=memory, max_tokens_limit=8000
+    # )
+
+    # while True:
+    #     query = Prompt.ask("[cyan]you [/cyan]")
+    #     if re.match('(Bye|bye|BYE).*', query) is not None:
+    #         print("[red]A   :[/red][italic red]bye![/italic red]")
+    #         break
+    #     result = qa({"question": query})
+    #     print("[red]A   :[/red]", end="")
+    #     print(result["answer"])
 
 
 if __name__ == "__main__":
