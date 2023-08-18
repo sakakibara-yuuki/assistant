@@ -26,7 +26,10 @@ from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import (
+    ConversationBufferMemory,
+    ConversationSummaryMemory
+)
 from pydantic import BaseModel
 from bs4 import BeautifulSoup
 import click
@@ -163,7 +166,8 @@ class BookShelf:
         return docs
 
     def create_db(self, docs):
-        text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=0)
+        # text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
         documents = text_splitter.split_documents(docs)
 
         ### What do you use VECTOR STORE ???? ########
@@ -202,8 +206,9 @@ def main(reference):
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    # memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
     qa = ConversationalRetrievalChain.from_llm(
-        OpenAI(temperature=0), vectordb.as_retriever(), memory=memory
+        llm, vectordb.as_retriever(), memory=memory, max_tokens_limit=4000
     )
 
     while True:
