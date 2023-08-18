@@ -12,7 +12,6 @@ from langchain.document_loaders import (
     UnstructuredMarkdownLoader,
     UnstructuredEmailLoader,
     OutlookMessageLoader,
-    UnstructuredImageLoader,
 )
 from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.document_loaders.generic import GenericLoader
@@ -156,8 +155,6 @@ class BookShelf:
                 loader = UnstructuredEmailLoader(uri)
             elif suffix == ".msg":
                 loader = OutlookMessageLoader(uri)
-            elif suffix in (".png", "jpg", "jpeg"):
-                loader = UnstructuredImageLoader(uri)
             else:
                 continue
 
