@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urlparse
 import pathlib
 import argparse
@@ -11,6 +12,7 @@ from langchain.document_loaders import (
     UnstructuredMarkdownLoader,
     UnstructuredEmailLoader,
     OutlookMessageLoader,
+    UnstructuredImageLoader,
 )
 from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
 from langchain.document_loaders.generic import GenericLoader
@@ -154,6 +156,8 @@ class BookShelf:
                 loader = UnstructuredEmailLoader(uri)
             elif suffix == ".msg":
                 loader = OutlookMessageLoader(uri)
+            elif suffix in (".png", "jpg", "jpeg"):
+                loader = UnstructuredImageLoader(uri)
             else:
                 continue
 
@@ -213,8 +217,8 @@ def main(reference):
 
     while True:
         query = Prompt.ask("[cyan]you [/cyan]")
-        if query == "see you.":
-            print("[red]A   :[/red][italic red]bye.[/italic red]")
+        if re.match('(Bye|bye|BYE).*', query) is not None:
+            print("[red]A   :[/red][italic red]bye![/italic red]")
             break
         result = qa({"question": query})
         print("[red]A   :[/red]", end="")
