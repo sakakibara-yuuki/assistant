@@ -62,8 +62,8 @@ class BookShelf:
         else:
             if reference is None:
                 raise FileNotFoundError("db is not found and reference is None")
-            # input_list = self.load_input_list(reference)
             input_list = self.load_reference(reference)
+            print(input_list)
             docs = self.create_documents(input_list)
             self.vectordb = self.create_db(docs)
 
@@ -208,7 +208,7 @@ def main(reference):
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
     qa = ConversationalRetrievalChain.from_llm(
-        llm, vectordb.as_retriever(), memory=memory, max_tokens_limit=4000
+        llm, vectordb.as_retriever(), memory=memory, max_tokens_limit=8000
     )
 
     while True:
