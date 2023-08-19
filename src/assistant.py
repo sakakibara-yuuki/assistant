@@ -78,27 +78,26 @@ class BookShelf:
 
         with open(reference_path, "r") as f:
             data = yaml.safe_load(f)
-            self.prompt = data['prompt']
-            input_list = []
-            # lines = f.readlines()
-            lines = data['files']
-            for uri in lines:
-                """ when line is url """
-                # uri = line.rstrip()
-                o = urlparse(uri)
-                if o.scheme in ("http", "https"):
-                    input_list.append(uri)
-                    continue
 
-                """ when line is directory path """
-                p = pathlib.Path(uri)
-                if p.is_dir():
-                    for _p in p.glob("**/*"):
-                        if _p.is_dir():
-                            continue
-                        input_list.append(str(_p))
-                else:
-                    input_list.append(str(p))
+        self.prompt = data['prompt']
+        input_list = []
+        lines = data['files']
+        for uri in lines:
+            """ when line is url """
+            o = urlparse(uri)
+            if o.scheme in ("http", "https"):
+                input_list.append(uri)
+                continue
+
+            """ when line is directory path """
+            p = pathlib.Path(uri)
+            if p.is_dir():
+                for _p in p.glob("**/*"):
+                    if _p.is_dir():
+                        continue
+                    input_list.append(str(_p))
+            else:
+                input_list.append(str(p))
 
         return input_list
 
