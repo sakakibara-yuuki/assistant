@@ -56,16 +56,23 @@ logger = logging.getLogger(__name__)
 
 class BookShelf:
     def __init__(self, reference:str):
+
         self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
+        self.input_list = []
+        self.prompt = None
+        self.vectordb = None
+        self.prompt = None
 
         if pathlib.Path("db").exists():
             self.vectordb = self.load_db()
-        else:
-            if reference is None:
-                raise FileNotFoundError("db is not found and reference is None")
-            input_list = self.load_reference(reference)
-            docs = self.create_documents(input_list)
-            self.vectordb = self.create_db(docs)
+            return
+
+        if reference is None:
+            raise FileNotFoundError("db is not found and reference is None")
+
+        self.input_list = self.load_reference(reference)
+        docs = self.create_documents(self.input_list)
+        self.vectordb = self.create_db(docs)
 
     def load_reference(self, reference):
         reference_path = pathlib.Path(reference)
@@ -81,8 +88,9 @@ class BookShelf:
 
         self.prompt = data['prompt']
         input_list = []
-        lines = data['files']
-        for uri in lines:
+
+        files = data['files']
+        for uri in files:
             """ when line is url """
             o = urlparse(uri)
             if o.scheme in ("http", "https"):
