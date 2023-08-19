@@ -37,7 +37,6 @@ from bs4 import BeautifulSoup
 import click
 import logging
 import esprima
-import pprint
 from rich import print
 from rich.prompt import Prompt
 
@@ -65,7 +64,6 @@ class BookShelf:
             if reference is None:
                 raise FileNotFoundError("db is not found and reference is None")
             input_list = self.load_reference(reference)
-            print(input_list)
             docs = self.create_documents(input_list)
             self.vectordb = self.create_db(docs)
 
@@ -80,19 +78,12 @@ class BookShelf:
 
         with open(reference_path, "r") as f:
             data = yaml.safe_load(f)
-            print('-'*31)
-            print(data)
-            print('-'*31)
-            # input_list = []
+            input_list = []
             # lines = f.readlines()
-            lines = data['flies']
-            print('='*31)
-            print(lines)
-            print('='*31)
-            for line in lines:
-
+            lines = data['files']
+            for uri in lines:
                 """ when line is url """
-                uri = line.rstrip()
+                # uri = line.rstrip()
                 o = urlparse(uri)
                 if o.scheme in ("http", "https"):
                     input_list.append(uri)
