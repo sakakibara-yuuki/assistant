@@ -78,6 +78,7 @@ class BookShelf:
 
         with open(reference_path, "r") as f:
             data = yaml.safe_load(f)
+            self.prompt = data['prompt']
             input_list = []
             # lines = f.readlines()
             lines = data['files']
@@ -112,7 +113,6 @@ class BookShelf:
                     raise Exception(f"{uri} cannot be found, and this is not URL")
                     continue
                 loader = WebBaseLoader(uri)
-                # loader = RecursiveUrlLoader(url=uri, max_depth=1, extractor=lambda x: BeautifulSoup(x, "html.parser").text)
                 loaders.append(loader)
                 continue
 
@@ -156,7 +156,6 @@ class BookShelf:
         # text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
         documents = text_splitter.split_documents(docs)
 
-        ### What do you use VECTOR STORE ???? ########
         vectordb = Chroma.from_documents(
             documents=documents, embedding=self.embedding, persist_directory="./db"
         )
@@ -205,26 +204,24 @@ def chat_mode(vectordb):
         print("[red]A   :[/red]", end="")
         print(result["answer"])
 
-def qa_mode(vectordb):
-    with open('prompt', 'r') as f:
-        query = f.read()
+def qa_mode(vectordb, prompt):
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
     qa = RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever())
-    answer = qa.run(query)
+    answer = qa.run(prompt)
     print(answer)
 
 def summary_mode():
     pass
 
 def main(reference, mode):
-
     bookshelf = BookShelf(reference)
     vectordb = bookshelf.vectordb
+    prompt = bookshelf.prompt
 
     if mode == "chat":
         chat_mode(vectordb)
     elif mode == "qa":
-        qa_mode(vectordb)
+        qa_mode(vectordb, prompt)
 
 
 if __name__ == "__main__":
