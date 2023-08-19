@@ -1,3 +1,4 @@
+import re
 from urllib.parse import urlparse
 import pathlib
 import argparse
@@ -26,7 +27,10 @@ from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import (
+    ConversationBufferMemory,
+    ConversationSummaryMemory
+)
 from pydantic import BaseModel
 from bs4 import BeautifulSoup
 import click
@@ -51,34 +55,65 @@ logger = logging.getLogger(__name__)
 
 
 class BookShelf:
-    def __init__(self, reference:str=None):
-
+    def __init__(self, reference:str):
         self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
 
-        if pathlib.Path('db').exists():
+        if pathlib.Path("db").exists():
             self.vectordb = self.load_db()
         else:
             if reference is None:
                 raise FileNotFoundError("db is not found and reference is None")
-            input_list = self.load_input_list(reference)
+            input_list = self.load_reference(reference)
+            print(input_list)
             docs = self.create_documents(input_list)
             self.vectordb = self.create_db(docs)
 
+    def load_reference(self, reference):
+        reference_path = pathlib.Path(reference)
+
+        if not reference_path.exists():
+            raise FileNotFoundError("reference is not Found")
+
+        if reference_path.is_dir():
+            raise FileNotFoundError("reference must be file not dir")
+
+        with open(reference_path, "r") as f:
+            input_list = []
+            lines = f.readlines()
+            for line in lines:
+
+                """ when line is url """
+                uri = line.rstrip()
+                o = urlparse(uri)
+                if o.scheme in ("http", "https"):
+                    input_list.append(uri)
+                    continue
+
+                """ when line is directory path """
+                p = pathlib.Path(uri)
+                if p.is_dir():
+                    for _p in p.glob("**/*"):
+                        if _p.is_dir():
+                            continue
+                        input_list.append(str(_p))
+                else:
+                    input_list.append(str(p))
+
+        return input_list
 
     def load_input_list(self, reference):
-        """ input from reference"""
+        """input from reference"""
         reference_path = pathlib.Path(reference)
         input_list = [str(p) for p in reference_path.glob("**/*") if not p.is_dir()]
 
         """ input from links"""
-        links_path = reference_path / 'links'
+        links_path = reference_path / "links"
         if links_path.exists():
-            with open(links_path, 'r') as f:
+            with open(links_path, "r") as f:
                 lines = f.readlines()
             for line in lines:
                 input_list.append(line.rstrip())
         return input_list
-
 
     def create_documents(self, input_list):
         loaders = []
@@ -99,7 +134,6 @@ class BookShelf:
             if suffix == ".txt":
                 loader = TextLoader(uri)
             elif suffix == ".html":
-                # loader = BSHTMLLoader(uri)
                 loader = UnstructuredHTMLLoader(uri)
             elif suffix == ".md":
                 loader = UnstructuredMarkdownLoader(uri)
@@ -112,7 +146,9 @@ class BookShelf:
                     uri,
                     glob="*",
                     suffixes=[".py"],
-                    parser=LanguageParser(language=Language.PYTHON, parser_threshold=400),
+                    parser=LanguageParser(
+                        language=Language.PYTHON, parser_threshold=400
+                    ),
                 )
             elif suffix == ".eml":
                 loader = UnstructuredEmailLoader(uri)
@@ -130,7 +166,8 @@ class BookShelf:
         return docs
 
     def create_db(self, docs):
-        text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=0)
+        # text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=0)
         documents = text_splitter.split_documents(docs)
 
         ### What do you use VECTOR STORE ???? ########
@@ -152,33 +189,56 @@ class BookShelf:
 @click.option(
     "-r",
     "--reference",
-    default="./reference",
+    default=None,
     show_default=True,
     type=click.Path(
-        exists=True, file_okay=False, dir_okay=True, writable=False, readable=True
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
     ),
 )
-def cli(reference):
-    main(reference)
+@click.option('--mode',
+              default='chat',
+              type=click.Choice(['qa', 'chat'], case_sensitive=False))
+def cli(reference, mode):
+    main(reference, mode)
 
-def main(reference):
-
-    bookshelf = BookShelf(reference)
-    vectordb = bookshelf.vectordb
-
+def chat_mode(vectordb):
     llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
 
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    qa = ConversationalRetrievalChain.from_llm(OpenAI(temperature=0), vectordb.as_retriever(), memory=memory)
+    # memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
+    qa = ConversationalRetrievalChain.from_llm(
+        llm, vectordb.as_retriever(), memory=memory, max_tokens_limit=8000
+    )
 
     while True:
         query = Prompt.ask("[cyan]you [/cyan]")
-        if query == "see you.":
-            print("[red]A   :[/red][italic red]bye.[/italic red]")
+        if re.match('(Bye|bye|BYE).*', query) is not None:
+            print("[red]A   :[/red][italic red]bye![/italic red]")
             break
         result = qa({"question": query})
         print("[red]A   :[/red]", end="")
         print(result["answer"])
+
+def qa_mode(vectordb):
+    with open('prompt', 'r') as f:
+        query = f.read()
+    llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
+    qa = RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever())
+    answer = qa.run(query)
+    print(answer)
+
+def summary_mode():
+    pass
+
+def main(reference, mode):
+
+    bookshelf = BookShelf(reference)
+    vectordb = bookshelf.vectordb
+
+    if mode == "chat":
+        chat_mode(vectordb)
+    elif mode == "qa":
+        qa_mode(vectordb)
 
 
 if __name__ == "__main__":
