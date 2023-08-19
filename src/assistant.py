@@ -1,5 +1,5 @@
 import re
-import tomllib
+import yaml
 from urllib.parse import urlparse
 import pathlib
 import argparse
@@ -79,8 +79,16 @@ class BookShelf:
             raise FileNotFoundError("reference must be file not dir")
 
         with open(reference_path, "r") as f:
-            input_list = []
-            lines = f.readlines()
+            data = yaml.safe_load(f)
+            print('-'*31)
+            print(data)
+            print('-'*31)
+            # input_list = []
+            # lines = f.readlines()
+            lines = data['flies']
+            print('='*31)
+            print(lines)
+            print('='*31)
             for line in lines:
 
                 """ when line is url """
