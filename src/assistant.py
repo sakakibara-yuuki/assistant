@@ -1,4 +1,5 @@
 import re
+import tomllib
 from urllib.parse import urlparse
 import pathlib
 import argparse
@@ -99,20 +100,6 @@ class BookShelf:
                 else:
                     input_list.append(str(p))
 
-        return input_list
-
-    def load_input_list(self, reference):
-        """input from reference"""
-        reference_path = pathlib.Path(reference)
-        input_list = [str(p) for p in reference_path.glob("**/*") if not p.is_dir()]
-
-        """ input from links"""
-        links_path = reference_path / "links"
-        if links_path.exists():
-            with open(links_path, "r") as f:
-                lines = f.readlines()
-            for line in lines:
-                input_list.append(line.rstrip())
         return input_list
 
     def create_documents(self, input_list):
