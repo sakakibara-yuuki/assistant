@@ -60,7 +60,6 @@ class BookShelf:
         if pathlib.Path('./db').exists():
             self.vectordb = self.load_db()
 
-
     def update(self, reference):
         data = self.load_yaml(reference)
         files = data['files']

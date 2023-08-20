@@ -35,6 +35,7 @@ dependencies = [
     "fake_useragent",
     "rich",
     "pyyaml",
+    "flake8",
 ]
 
 dynamic = ["version"]
