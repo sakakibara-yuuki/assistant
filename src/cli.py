@@ -49,21 +49,60 @@ from rich import print
 from rich.prompt import Prompt
 
 
-@click.command()
+@click.group()
+@click.pass_context
+def cli(ctx):
+    ctx.ensure_object(dict)
+    ctx.obj['bookshelf'] = BookShelf()
+
+
+@cli.command()
+@click.pass_context
 @click.option(
-    "-r",
-    "--reference",
+    "-u",
+    "--update",
     default=None,
     show_default=True,
     type=click.Path(
         exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
     ),
 )
-@click.option('--mode',
-              default='chat',
-              type=click.Choice(['qa', 'chat'], case_sensitive=False))
-def cli(reference, mode):
-    main(reference, mode)
+def bookshelf(ctx, update):
+    bookshelf = ctx.obj['bookshelf']
+    if update is not None:
+        bookshelf.update(update)
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    "-p",
+    "--prompt",
+    default=None,
+    show_default=True,
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
+    ),
+)
+@click.option(
+    "-i",
+    "--interactive",
+    default=False,
+    show_default=True,
+    type=bool
+)
+def qa(ctx, prompt, interactive):
+    bookshelf = ctx.obj['bookshelf']
+    if interactive is True:
+        prompt = Prompt.ask("[cyan]you [/cyan]")
+    qa_mode(bookshelf.vectordb, prompt)
+
+
+@cli.command()
+@click.pass_context
+def chat(ctx):
+    bookshelf = ctx.obj['bookshelf']
+    chat_mode(bookshelf.vectordb)
 
 
 def chat_mode(vectordb):
@@ -79,7 +118,7 @@ def chat_mode(vectordb):
         query = Prompt.ask("[cyan]you [/cyan]")
         if re.match('(Bye|bye|BYE).*', query) is not None:
             print("[red]A   :[/red][italic red]bye![/italic red]")
-            break
+            return
         result = qa({"question": query})
         print("[red]A   :[/red]", end="")
         print(result["answer"])
@@ -90,21 +129,6 @@ def qa_mode(vectordb, prompt):
     qa = RetrievalQA.from_llm(llm=llm, retriever=vectordb.as_retriever())
     answer = qa.run(prompt)
     print(answer)
-
-
-def summary_mode():
-    pass
-
-
-def main(reference, mode):
-    bookshelf = BookShelf(reference)
-    vectordb = bookshelf.vectordb
-    prompt = bookshelf.data['prompt']
-
-    if mode == "chat":
-        chat_mode(vectordb)
-    elif mode == "qa":
-        qa_mode(vectordb, prompt)
 
 
 if __name__ == "__main__":

@@ -55,19 +55,17 @@ logger = logging.getLogger(__name__)
 
 
 class BookShelf:
-    def __init__(self, reference:str):
+    def __init__(self):
         self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
-        self.input_list = []
-        self.vectordb = None
-        self.data = self.load_yaml(reference)
-
-        if pathlib.Path("db").exists():
+        if pathlib.Path('./db').exists():
             self.vectordb = self.load_db()
-            return
 
-        files = self.data['files']
-        self.input_list = self.load_reference(files)
-        docs = self.create_documents(self.input_list)
+
+    def update(self, reference):
+        data = self.load_yaml(reference)
+        files = data['files']
+        input_list = self.load_reference(files)
+        docs = self.create_documents(input_list)
         self.vectordb = self.create_db(docs)
 
     def load_yaml(self, reference):
