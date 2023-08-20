@@ -34,6 +34,9 @@ dependencies = [
     "markdown",
     "fake_useragent",
     "rich",
+    "pyyaml",
+    "flake8",
+    "isort",
 ]
 
 dynamic = ["version"]
