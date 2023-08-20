@@ -5,12 +5,12 @@
 #
 # Distributed under terms of the MIT license.
 
-import streamlit as st
-import pandas as pd
 from io import StringIO
 
-from assistant import BookShelf
+import pandas as pd
+import streamlit as st
 
+from assistant import BookShelf
 
 bookshelf = BookShelf()
 

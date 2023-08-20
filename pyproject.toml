@@ -36,6 +36,7 @@ dependencies = [
     "rich",
     "pyyaml",
     "flake8",
+    "isort",
 ]
 
 dynamic = ["version"]

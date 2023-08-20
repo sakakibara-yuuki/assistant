@@ -4,56 +4,23 @@
 # Copyright © 2023 sakakibara <sakakibara@dyana>
 #
 # Distributed under terms of the MIT license.
-import click
-from assistant import BookShelf
 import re
-import yaml
-from urllib.parse import urlparse
-import pathlib
-import argparse
-from langchain.document_loaders import (
-    TextLoader,
-    UnstructuredHTMLLoader,
-    BSHTMLLoader,
-    WebBaseLoader,
-    PyPDFLoader,
-    UnstructuredPowerPointLoader,
-    UnstructuredMarkdownLoader,
-    UnstructuredEmailLoader,
-    OutlookMessageLoader,
-)
-from langchain.document_loaders.recursive_url_loader import RecursiveUrlLoader
-from langchain.document_loaders.generic import GenericLoader
-from langchain.document_loaders.parsers import LanguageParser
-from langchain.text_splitter import Language
-from langchain.text_splitter import (
-    CharacterTextSplitter,
-    RecursiveCharacterTextSplitter,
-)
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import (
-    ConversationBufferMemory,
-    ConversationSummaryMemory
-)
-from pydantic import BaseModel
-from bs4 import BeautifulSoup
+
 import click
-import logging
-import esprima
+from langchain.chains import ConversationalRetrievalChain, RetrievalQA
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
 from rich import print
 from rich.prompt import Prompt
+
+from bookshelf import BookShelf
 
 
 @click.group()
 @click.pass_context
 def cli(ctx):
     ctx.ensure_object(dict)
-    ctx.obj['bookshelf'] = BookShelf()
+    ctx.obj["bookshelf"] = BookShelf()
 
 
 @cli.command()
@@ -68,7 +35,7 @@ def cli(ctx):
     ),
 )
 def bookshelf(ctx, update):
-    bookshelf = ctx.obj['bookshelf']
+    bookshelf = ctx.obj["bookshelf"]
     if update is not None:
         bookshelf.update(update)
 
@@ -84,15 +51,9 @@ def bookshelf(ctx, update):
         exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
     ),
 )
-@click.option(
-    "-i",
-    "--interactive",
-    default=False,
-    show_default=True,
-    type=bool
-)
+@click.option("-i", "--interactive", default=False, show_default=True, type=bool)
 def qa(ctx, prompt, interactive):
-    bookshelf = ctx.obj['bookshelf']
+    bookshelf = ctx.obj["bookshelf"]
     if interactive is True:
         prompt = Prompt.ask("[cyan]you [/cyan]")
     qa_mode(bookshelf.vectordb, prompt)
@@ -101,7 +62,7 @@ def qa(ctx, prompt, interactive):
 @cli.command()
 @click.pass_context
 def chat(ctx):
-    bookshelf = ctx.obj['bookshelf']
+    bookshelf = ctx.obj["bookshelf"]
     chat_mode(bookshelf.vectordb)
 
 
@@ -116,7 +77,7 @@ def chat_mode(vectordb):
 
     while True:
         query = Prompt.ask("[cyan]you [/cyan]")
-        if re.match('(Bye|bye|BYE).*', query) is not None:
+        if re.match("(Bye|bye|BYE).*", query) is not None:
             print("[red]A   :[/red][italic red]bye![/italic red]")
             return
         result = qa({"question": query})
