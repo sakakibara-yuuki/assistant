@@ -8,3 +8,4 @@ prompt/*
 answer/*
 books/*
 tutorial/
+__pycache__/
