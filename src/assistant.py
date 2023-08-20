@@ -56,25 +56,21 @@ logger = logging.getLogger(__name__)
 
 class BookShelf:
     def __init__(self, reference:str):
-
         self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
         self.input_list = []
-        self.prompt = None
         self.vectordb = None
-        self.prompt = None
+        self.data = self.load_yaml(reference)
 
         if pathlib.Path("db").exists():
             self.vectordb = self.load_db()
             return
 
-        if reference is None:
-            raise FileNotFoundError("db is not found and reference is None")
-
-        self.input_list = self.load_reference(reference)
+        files = self.data['files']
+        self.input_list = self.load_reference(files)
         docs = self.create_documents(self.input_list)
         self.vectordb = self.create_db(docs)
 
-    def load_reference(self, reference):
+    def load_yaml(self, reference):
         reference_path = pathlib.Path(reference)
 
         if not reference_path.exists():
@@ -86,10 +82,12 @@ class BookShelf:
         with open(reference_path, "r") as f:
             data = yaml.safe_load(f)
 
-        self.prompt = data['prompt']
+        return data
+
+    def load_reference(self, files):
+
         input_list = []
 
-        files = data['files']
         for uri in files:
             """ when line is url """
             o = urlparse(uri)
@@ -223,7 +221,7 @@ def summary_mode():
 def main(reference, mode):
     bookshelf = BookShelf(reference)
     vectordb = bookshelf.vectordb
-    prompt = bookshelf.prompt
+    prompt = bookshelf.data['prompt']
 
     if mode == "chat":
         chat_mode(vectordb)
