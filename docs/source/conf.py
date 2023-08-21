@@ -14,7 +14,13 @@ release = '0.0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    'myst_parser',
+    'furo.gen_tutorials',
+    'sphinx.ext.githubpages',
+    'sphinx.ext.viewcode',
+    'sphinx_github_changelog',
+    ]
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -26,3 +32,10 @@ language = 'ja'
 
 html_theme = 'furo'
 html_static_path = ['_static']
+
+html_css_files = [
+    'css/termynal.css',
+]
+html_js_files = [
+    'js/termynal.js',
+]
