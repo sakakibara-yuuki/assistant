@@ -72,4 +72,4 @@ $ python -m assistant qa -i
 <br />
 
 ## Documents
-Document is [HERE](https://sakakibara-yuuki.github.io/assistant/)
+For more detailed programme content, click [HERE](https://sakakibara-yuuki.github.io/assistant/)!!
