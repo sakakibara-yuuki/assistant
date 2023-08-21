@@ -12,4 +12,4 @@ Commands:
   chat
   qa
 ```
-document is ![here](https://sakakibara-yuuki.github.io/assistant/)
+document is [here](https://sakakibara-yuuki.github.io/assistant/)
