@@ -51,7 +51,7 @@ lastpage:
 <!-- :alt: Minari Logo -->
 <!-- ``` -->
 
-```{project-heading}
+```
 A dataset API for Offline Reinforcement Learning.
 ```
 
