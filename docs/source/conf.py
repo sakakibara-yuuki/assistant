@@ -37,5 +37,4 @@ html_css_files = [
 ]
 html_js_files = [
     'js/termynal.js',
-    'js/custom.js',
 ]
