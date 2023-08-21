@@ -42,18 +42,17 @@ lastpage:
 <!-- :hidden: -->
 <!-- :caption: Development -->
 
-<!-- Github <https://github.com/Farama-Foundation/Minari> -->
+<!-- Github <https://github.com/sakakibara-yuuki/assistant> -->
 <!-- release_notes/index -->
-<!-- Contribute to the Docs <https://github.com/Farama-Foundation/Minari/tree/main/docs> -->
 <!-- ``` -->
 
 <!-- ```{project-logo} _static/img/minari-text.png -->
 <!-- :alt: Minari Logo -->
 <!-- ``` -->
 
-```
-A dataset API for Offline Reinforcement Learning.
-```
+# Assistant For You !
+build bookshelf, and chat! your assistant !
+
 
 <div id="termynal" data-termynal>
   <span data-ty="input">pip install assistant</span>
@@ -73,3 +72,36 @@ A dataset API for Offline Reinforcement Learning.
   <span data-ty="input" data-ty-prompt="you :">what is CQL?</span>
   <span data-ty="input" data-ty-prompt="A   :">CQL is 'Conservative Q-Learning' that is ...</span>
 </div>
+
+## requirements
+
+- python >= 3.11
+
+
+## installation
+
+```sh
+git clone https://github.com/sakakibara-yuuki/assistant.git
+pip install -e .
+```
+
+## How to Use
+
+**create bookshelf**
+
+```sh
+python -m assistant bookshelf -u reference.yaml
+```
+
+**chat assistant**
+
+```sh
+python -m assistant chat
+```
+if you end, input `bye`
+
+**QA assistant**
+
+```sh
+python -m assistant qa
+```
