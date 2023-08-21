@@ -55,7 +55,6 @@ lastpage:
 A dataset API for Offline Reinforcement Learning.
 ```
 
-
 <div id="termynal" data-termynal>
   <span data-ty="input">pip install assistant</span>
   <span data-ty="progress"></span>

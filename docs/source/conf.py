@@ -16,7 +16,6 @@ release = '0.0.1'
 
 extensions = [
     'myst_parser',
-    'furo.gen_tutorials',
     'sphinx.ext.githubpages',
     'sphinx.ext.viewcode',
     'sphinx_github_changelog',
@@ -38,4 +37,5 @@ html_css_files = [
 ]
 html_js_files = [
     'js/termynal.js',
+    'js/custom.js',
 ]
