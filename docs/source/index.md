@@ -57,7 +57,6 @@ build bookshelf, and chat! your assistant !
 <div id="termynal" data-termynal>
   <span data-ty="input">git clone https://github.com/sakakibara-yuuki/assistant.git</span>
   <span data-ty="input">pip install -e .</span>
-  <span data-ty="progress"></span>
   <span data-ty>Successfully installed assistant</span>
   <span data-ty></span>
   <span data-ty="input">python -m assistant bookshelf -u reference.yaml</span>
