@@ -37,6 +37,8 @@ dependencies = [
     "pyyaml",
     "flake8",
     "isort",
+    "sphinx",
+    "furo",
 ]
 
 dynamic = ["version"]
