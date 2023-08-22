@@ -19,6 +19,7 @@ from langchain.document_loaders import (
     UnstructuredPowerPointLoader,
     WebBaseLoader,
     UnstructuredEPubLoader,
+    UnstructuredRSTLoader,
 )
 from langchain.document_loaders.generic import GenericLoader
 from langchain.document_loaders.parsers import LanguageParser
@@ -129,6 +130,8 @@ class BookShelf:
                 loader = OutlookMessageLoader(uri)
             elif suffix == ".epub":
                 loader = UnstructuredEPubLoader(uri)
+            elif suffix == ".rst":
+                loader = UnstructuredRSTLoader(file_path=uri, mode="elements")
             else:
                 continue
 
