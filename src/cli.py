@@ -8,6 +8,7 @@ import re
 
 import click
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
+from langchain.chains.summarize import load_summarize_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from rich import print
@@ -64,6 +65,35 @@ def qa(ctx, prompt, interactive):
 def chat(ctx):
     bookshelf = ctx.obj["bookshelf"]
     chat_mode(bookshelf.vectordb)
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    "-p",
+    "--prompt",
+    default=None,
+    show_default=True,
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
+    ),
+)
+def summary(ctx, prompt):
+    bookshelf = ctx.obj["bookshelf"]
+    if prompt is not None:
+        with open(prompt, 'r') as f:
+            prompt = f.read()
+    else:
+        prompt = Prompt.ask("[cyan]you [/cyan]")
+    summary_mode(bookshelf.vectordb, prompt)
+
+
+def summary_mode(vectordb, prompt):
+    llm = ChatOpenAI(model_name="gpt-4", temperature=1.0)
+    chain = load_summarize_chain(llm, chain_type="stuff")
+    search = vectordb.similarity_search(" ")
+    answer = chain.run(input_documents=search, question=prompt)
+    print(answer)
 
 
 def chat_mode(vectordb):
