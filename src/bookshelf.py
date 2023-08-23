@@ -18,7 +18,10 @@ from langchain.document_loaders import (
     UnstructuredMarkdownLoader,
     UnstructuredPowerPointLoader,
     WebBaseLoader,
+    UnstructuredEPubLoader,
+    UnstructuredRSTLoader,
 )
+from langchain.document_loaders.image import UnstructuredImageLoader
 from langchain.document_loaders.generic import GenericLoader
 from langchain.document_loaders.parsers import LanguageParser
 from langchain.embeddings import OpenAIEmbeddings
@@ -126,6 +129,12 @@ class BookShelf:
                 loader = UnstructuredEmailLoader(uri)
             elif suffix == ".msg":
                 loader = OutlookMessageLoader(uri)
+            elif suffix == ".epub":
+                loader = UnstructuredEPubLoader(uri)
+            elif suffix == ".rst":
+                loader = UnstructuredRSTLoader(file_path=uri, mode="elements")
+            elif suffix in (".jpg", ".png"):
+                loader = UnstructuredImageLoader(uri)
             else:
                 continue
 

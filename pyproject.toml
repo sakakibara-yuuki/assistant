@@ -37,6 +37,7 @@ dependencies = [
     "pyyaml",
     "flake8",
     "isort",
+    "pdfminer",
 ]
 
 dynamic = ["version"]
