@@ -41,3 +41,10 @@ dependencies = [
 ]
 
 dynamic = ["version"]
+
+
+[project.optional-dependencies]
+pdf = ["ReportLab>=1.2", "RXP"]
+
+[tool.setuptools]
+packages = ["assistant"]
