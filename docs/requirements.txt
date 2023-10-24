@@ -1,6 +1,0 @@
-sphinx
-furo
-myst-parser
-sphinx-intl
-sphinx-github-changelog
-sphinx-autobuild

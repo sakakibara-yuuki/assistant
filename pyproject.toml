@@ -1,13 +1,12 @@
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
 
 [project]
-name = "assistant"
+name = "bookshelf"
 authors = [
     {name = "sakakibara yuuki", email = "sakakilabo0000@gmail.com"},
 ]
-description = "This is my dream"
+description = 'This is my "power"'
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
@@ -27,7 +26,6 @@ dependencies = [
     "deepl",
     "pypdf",
     "click",
-    "black",
     "pydantic",
     "streamlit",
     "esprima",
@@ -35,16 +33,24 @@ dependencies = [
     "fake_useragent",
     "rich",
     "pyyaml",
-    "flake8",
-    "isort",
     "pdfminer",
 ]
 
 dynamic = ["version"]
 
-
 [project.optional-dependencies]
-pdf = ["ReportLab>=1.2", "RXP"]
+utils = [
+  "flake8",
+  "isort",
+  "black",
+]
+test = [
+  "pytest",
+]
+
+
+[project.scripts]
+bookshelf = "bookshelf:cli"
 
 [tool.setuptools]
-packages = ["assistant"]
+packages = ["bookshelf"]
